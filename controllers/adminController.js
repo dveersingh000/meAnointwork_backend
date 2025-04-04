@@ -141,8 +141,25 @@ export const createUserByAdmin = async (req, res) => {
     try {
       const user = await User.findById(userId);
       if (!user) return res.status(404).send('UserNotFound');
+  
       user.workAssigned = workAssigned;
       await user.save();
+  
+      // Manage WorkAssignment record
+      if (workAssigned) {
+        const assignedAt = new Date();
+        const expiresAt = new Date();
+        expiresAt.setMonth(expiresAt.getMonth() + 1);
+  
+        await WorkAssignment.findOneAndUpdate(
+          { userId },
+          { userId, assignedAt, expiresAt },
+          { upsert: true, new: true }
+        );
+      } else {
+        await WorkAssignment.deleteOne({ userId });
+      }
+  
       res.send('WorkAssignmentUpdated');
     } catch (err) {
       console.error(err);

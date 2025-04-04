@@ -6,7 +6,14 @@ const submittedTaskSchema = new mongoose.Schema({
   inputText: String,
   accuracy: Number,
   plagiarism: Object,
-  submittedAt: { type: Date, default: Date.now }
+  isFinalSubmit: { type: Boolean, default: false },
+  status: {
+    type: String,
+    enum: ['draft', 'submitted'],
+    default: 'draft',
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 export default mongoose.model('SubmittedTask', submittedTaskSchema);

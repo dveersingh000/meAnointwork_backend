@@ -3,7 +3,11 @@ import  protect  from '../middleware/authMiddleware.js';
 import {
     getUserTasks,
     getTaskDetail,
-    submitTask
+    saveTask,
+    getTask,
+    submitAllTasks,
+    getPlanExpiry,
+    // getUserSubmission
   } from '../controllers/userController.js';
 
 const router = express.Router();
@@ -13,6 +17,12 @@ router.get('/me', protect, (req, res) => {
 });
 router.get('/tasks', protect, getUserTasks);
 router.get('/tasks/:id', protect, getTaskDetail);
-router.post('/tasks/:id/submit', protect, submitTask);
+// router.post('/tasks/:id/submit', protect, submitTask);
+router.get('/plan-expiry', protect, getPlanExpiry);
+// router.get('/submissions/:id', protect, getUserSubmission);
+router.post('/tasks/:id/save', protect, saveTask);
+router.get('/tasks/:id/saved', protect, getTask); // for fetching task data
+router.post('/submit-all', protect, submitAllTasks); // for fetching task data
+
 
 export default router;
