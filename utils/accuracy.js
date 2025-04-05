@@ -1,28 +1,45 @@
 export const calculateAccuracy = (reference, input) => {
-  const clean = (txt) =>
-    txt
+  const clean = (text) =>
+    text
+      .replace(/\s+/g, ' ') // normalize whitespace
+      .replace(/[^\w\s]/g, '') // remove punctuation
       .trim()
-      .replace(/\r\n/g, '\n')
-      .split('\n')
-      .map(line => line.trim().toLowerCase());
+      .toLowerCase();
 
-  const refLines = clean(reference);
-  const inputLines = clean(input);
+  const ref = clean(reference);
+  const inp = clean(input);
 
-  const totalLines = refLines.length;
-  let matching = 0;
+  const distance = levenshteinDistance(ref, inp);
+  const maxLen = Math.max(ref.length, inp.length);
+  const accuracy = maxLen === 0 ? 0 : ((1 - distance / maxLen) * 100).toFixed(2);
 
-  for (let i = 0; i < totalLines; i++) {
-    if (!inputLines[i]) continue;
-    const refLine = refLines[i];
-    const inpLine = inputLines[i];
-    const dist = levenshteinDistance(refLine, inpLine);
-    const maxLen = Math.max(refLine.length, inpLine.length);
-    const lineAccuracy = 1 - dist / maxLen;
+  return parseFloat(accuracy);
+};
 
-    if (lineAccuracy >= 0.9) matching++; // consider this line accurate
+// Levenshtein distance function
+function levenshteinDistance(a, b) {
+  const dp = Array.from({ length: a.length + 1 }, () =>
+    Array(b.length + 1).fill(0)
+  );
+
+  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] =
+          1 +
+          Math.min(
+            dp[i - 1][j], // delete
+            dp[i][j - 1], // insert
+            dp[i - 1][j - 1] // substitute
+          );
+      }
+    }
   }
 
-  const accuracy = (matching / totalLines) * 100;
-  return parseFloat(accuracy.toFixed(2));
-};
+  return dp[a.length][b.length];
+}
